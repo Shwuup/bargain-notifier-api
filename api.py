@@ -2,6 +2,11 @@ from bs4 import BeautifulSoup
 import requests
 import logging
 import hug
+from hug.middleware import CORSMiddleware
+
+api = hug.API(__name__)
+api.http.add_middleware(CORSMiddleware(api))
+
 
 def get_html_doc():
     headers = {
@@ -12,9 +17,11 @@ def get_html_doc():
     ).content
     return BeautifulSoup(html_content, "html.parser")
 
-@hug.get('/bargain')
-def bargain(body):
-    return get_elegible_bargains(body['item list'])
+
+@hug.post("/bargain")
+def bargain(body, response):
+    return get_elegible_bargains(body["item list"])
+
 
 def get_elegible_bargains(search_terms):
     soup = get_html_doc()
@@ -27,9 +34,7 @@ def get_elegible_bargains(search_terms):
             link = "https://www.ozbargain.com.au/node/" + offer_info["id"].strip(
                 "title"
             )
-            if (
-                search_term.lower() in offer_info["data-title"].lower()
-            ):
+            if search_term.lower() in offer_info["data-title"].lower():
                 print(offer_info["data-title"])
                 # offers_message += "%s\n%s\n\n" % (offer_info["data-title"], link)
                 deals[link] = offer_info["data-title"]
