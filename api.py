@@ -20,22 +20,28 @@ def get_html_doc():
 
 @hug.post("/bargain")
 def bargain(body, response):
-    return get_elegible_bargains(body["item list"])
+    print(body)
+    return get_elegible_bargains(body)
 
 
-def get_elegible_bargains(search_terms):
+def get_elegible_bargains(keyword_object):
     soup = get_html_doc()
     res = soup.find_all(class_="node-ozbdeal")
-    deals = {}
-    offers_message = ""
-    for offers in res:
-        offer_info = offers.find("h2", class_="title")
-        for search_term in search_terms:
+    #TODO: need to think about how to tell when it is actually a NEW deal. and where that logic lives;
+    for offer_html in res:
+        offer_info = offer_html.find("h2", class_="title")
+        for keyword in keyword_object["keywords"]:
             link = "https://www.ozbargain.com.au/node/" + offer_info["id"].strip(
                 "title"
             )
-            if search_term.lower() in offer_info["data-title"].lower():
-                print(offer_info["data-title"])
-                # offers_message += "%s\n%s\n\n" % (offer_info["data-title"], link)
-                deals[link] = offer_info["data-title"]
-    return deals
+            offer_title = offer_info["data-title"]
+            seen_links = [offer[0] for offer in keyword_object["keywords"][keyword]["offers"]]
+            if keyword.lower() in offer_title.lower() and link not in seen_links:
+                keyword_object["areThereNewDeals"] = True
+                print(offer_title)
+                offers = keyword_object["keywords"][keyword]["offers"]
+                offers.append([link, offer_title])
+                keyword_object["keywords"][keyword] = {"offers":offers, "hasUserClicked": False}
+                
+
+    return keyword_object
