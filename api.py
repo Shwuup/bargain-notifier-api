@@ -41,6 +41,7 @@ def get_elegible_bargains(keyword_object, is_test=False):
     else:
         soup = get_html_doc()
     res = soup.find_all(class_="node-ozbdeal")
+
     for offer_html in res:
         offer_info = offer_html.find("h2", class_="title")
         for keyword in keyword_object["keywords"]:
@@ -56,6 +57,11 @@ def get_elegible_bargains(keyword_object, is_test=False):
                 keyword_object["areThereNewDeals"] = True
                 print(offer_title)
                 keyword_info["offers"].append([link, offer_title])
+                if (
+                    not keyword_info["isOnFrontPage"]
+                    and not keyword_info["hasUserClicked"]
+                ) or keyword_info["hasUserClicked"]:
+                    keyword_object["numberOfUnclickedKeywords"] += 1
                 keyword_info["isOnFrontPage"] = True
                 keyword_info["hasUserClicked"] = False
 
