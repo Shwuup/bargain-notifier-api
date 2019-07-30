@@ -122,6 +122,18 @@ OzB.dismissNewsletter(1);
                   <p>Bunnings Vermont South only require you to purchase ANY item (I bought a $1.95 battery) to obtain their free 2 hour courtesy trailer. Have done this without question on 3 occasions now at this &#8230;</p>          </div>
     <div class="links" id="links471518"><ul class="links"><li><i class="fa fa-comment"></i> 46</li><li><span class="tag"><i class="fa fa-tag"></i> <a href="/cat/other">Other</a></span></li></ul></div>  </div>
 </div>
+<div class="node node-ozbdeal node-teaser" id="node471519">
+  <div class="n-left">
+    <img src="https://files.ozbargain.com.au/u/48/311648-38.jpg?h=4c897f15" alt="" width="38" height="38" class="gravatar"/>    <div class="n-vote n-deal  inact" data-nid="471519"><span class="nvb voteup"><i class="fa fa-plus"></i><span>60</span></span><span class="nvb votedown"><i class="fa fa-minus"></i><span>3</span></span></div>  </div>
+  <div class="n-right">
+    <div class="right">
+      <div class="foxshot-container"><a href="/goto/471519" rel="noopener nofollow" title="Go to https://www.bunnings.com.au/our-services/in-store/get-it-home" target="_blank"><img src="https://files.ozbargain.com.au/n/18/471519.jpg?h=65ed02bc" alt="[VIC] Free Courtesy 2-Hour Trailer Hire with Any Product Purchase @ Bunnings, Vermont South 2"/></a></div>    </div>
+        <h2 class="title" id="title471519" data-title="[VIC] Free Courtesy 2-Hour Trailer Hire with Any Product Purchase @ Bunnings, Vermont South 2"><a href="/node/471519">[VIC] Free Courtesy 2-Hour Trailer Hire with Any Product Purchase @ Bunnings, Vermont South</a></h2>
+        <div class="submitted"><span class="plate learner" title="1st Deal Posted by This User">L</span><strong><a href="/user/311648" title="View user profile." onclick="return OzB.user_tooltip(this)">SecretSquirrel</a></strong> on 18/07/2019 - 17:41 <span class="via"><i class="fa fa-link"></i> <a href="/goto/471519" rel="noopener nofollow" target="_blank">www.bunnings.com.au</a></span></div>
+    <div class="content">
+                  <p>Bunnings Vermont South only require you to purchase ANY item (I bought a $1.95 battery) to obtain their free 2 hour courtesy trailer. Have done this without question on 3 occasions now at this &#8230;</p>          </div>
+    <div class="links" id="links471519"><ul class="links"><li><i class="fa fa-comment"></i> 46</li><li><span class="tag"><i class="fa fa-tag"></i> <a href="/cat/other">Other</a></span></li></ul></div>  </div>
+</div>
 <div class="node node-ozbdeal node-teaser" id="node471508">
   <div class="n-left">
     <img src="https://files.ozbargain.com.au/g/38.jpg" alt="" width="38" height="38" class="gravatar"/>    <div class="n-vote n-deal  inact" data-nid="471508"><span class="nvb voteup"><i class="fa fa-plus"></i><span>28</span></span><span class="nvb votedown"><i class="fa fa-minus"></i><span>0</span></span></div>  </div>

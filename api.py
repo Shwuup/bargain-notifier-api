@@ -45,15 +45,13 @@ def get_elegible_bargains(keyword_object, is_test=False):
     for offer_html in res:
         offer_info = offer_html.find("h2", class_="title")
         for keyword in keyword_object["keywords"]:
+            keyword_info = keyword_object["keywords"][keyword]
             link = "https://www.ozbargain.com.au/node/" + offer_info["id"].strip(
                 "title"
             )
             offer_title = offer_info["data-title"]
-            seen_links = [
-                offer[0] for offer in keyword_object["keywords"][keyword]["offers"]
-            ]
+            seen_links = [offer[0] for offer in keyword_info["offers"]]
             if keyword.lower() in offer_title.lower() and link not in seen_links:
-                keyword_info = keyword_object["keywords"][keyword]
                 keyword_object["areThereNewDeals"] = True
                 print(offer_title)
                 keyword_info["offers"].append([link, offer_title])
