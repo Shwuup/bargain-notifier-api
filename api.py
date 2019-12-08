@@ -2,7 +2,9 @@ from bs4 import BeautifulSoup
 import requests
 import logging
 import hug
+import boto3
 from hug.middleware import CORSMiddleware
+
 
 api = hug.API(__name__)
 api.http.add_middleware(CORSMiddleware(api))
@@ -29,6 +31,11 @@ def bargain(body, response):
     return get_elegible_bargains(body)
 
 
+@hug.get("/ping")
+def ping():
+    return "still up!"
+
+
 @hug.post("/test_bargain")
 def test_bargain(body, response):
     print(body)
@@ -36,10 +43,15 @@ def test_bargain(body, response):
 
 
 def get_elegible_bargains(keyword_object, is_test=False):
+    s3 = boto3.resource("s3")
+
     if is_test:
         soup = get_html_doc(is_test=True)
     else:
-        soup = get_html_doc()
+        # get cached copy from s3 bucket
+        obj = s3.Object("bargain-notifier-bucket", "bargain_html")
+        html_content = obj.get()["Body"].read().decode("utf-8")
+        soup = BeautifulSoup(html_content, "html.parser")
     res = soup.find_all(class_="node-ozbdeal")
 
     for offer_html in res:
