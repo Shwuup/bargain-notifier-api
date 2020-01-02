@@ -43,16 +43,15 @@ def test_bargain(body, response):
 
 
 def get_elegible_bargains(keyword_object, is_test=False):
-    s3 = boto3.resource("s3")
-
     if is_test:
         soup = get_html_doc(is_test=True)
     else:
         # get cached copy from s3 bucket
+        s3 = boto3.resource("s3")
         obj = s3.Object("bargain-notifier-bucket", "bargain_html")
         html_content = obj.get()["Body"].read().decode("utf-8")
         soup = BeautifulSoup(html_content, "html.parser")
-    res = soup.find_all(class_="node-ozbdeal")
+    res = soup.find_all(class_="node node-ozbdeal node-teaser")
 
     for offer_html in res:
         offer_info = offer_html.find("h2", class_="title")
