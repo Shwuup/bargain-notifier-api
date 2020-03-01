@@ -52,7 +52,7 @@ def get_elegible_bargains(payload):
                     payload["numberOfUnclickedKeywords"] += 1
                 keyword_info["isOnFrontPage"] = True
                 keyword_info["hasUserClicked"] = False
-    for url in payload["seenDeals"].keys():
+    for url in list(payload["seenDeals"].keys()):
         if url not in cached_deals:
             del payload["seenDeals"][url]
 
