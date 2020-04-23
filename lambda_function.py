@@ -1,50 +1,22 @@
-from bs4 import BeautifulSoup
-import requests
-import logging
-import hug
-import boto3
-from hug.middleware import CORSMiddleware
 import json
-
-
-api = hug.API(__name__)
-api.http.add_middleware(CORSMiddleware(api))
-
-
-@hug.post("/bargain")
-def bargain(body, response):
-    print(body)
-    return get_elegible_bargains(body)
-
-
-@hug.get("/ping")
-def ping():
-    return "still up!"
-
-
-@hug.post("/test_bargain")
-def test_bargain(body, response):
-    print(body)
-    return get_elegible_bargains(body, is_test=True)
-
+import boto3
 
 def get_cached_deals():
     s3 = boto3.resource("s3")
-    obj = s3.Object("bargain-notifier-bucket", "dic")
+    obj = s3.Object("cached-deals", "dic")
     deals = json.loads(obj.get()["Body"].read().decode("utf-8"))
     return deals
-
 
 def get_elegible_bargains(payload):
     cached_deals = get_cached_deals()
     new_seen_deals = {}
     for link, title in cached_deals.items():
-        for keyword in payload["keywords"]:
-            keyword_info = payload["keywords"][keyword]
+        for keyword_info in payload["keywords"]:
+            keyword = keyword_info["keyword"]
             if keyword in title.lower() and link not in payload["seenDeals"]:
                 payload["areThereNewDeals"] = True
-                print(title)
-                keyword_info["offers"][link] = title
+                keyword_info["offers"].append({"url": link, "title": title})
+                # keyword_info["offers"][link] = title
                 if (
                     not keyword_info["isOnFrontPage"]
                     and not keyword_info["hasUserClicked"]
@@ -58,3 +30,7 @@ def get_elegible_bargains(payload):
 
     return payload
 
+def lambda_handler(event, context):    
+    body = json.loads(event["body"])
+    bargains = get_elegible_bargains(body)
+    return json.dumps(bargains)
