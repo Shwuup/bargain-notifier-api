@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  bargain-notifier-token-api
+
+  API for syncing mobile tokens
+
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  ApiDeployment:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Stage
+
+  BargainNotifierTokenApiFunction:
+    Type: AWS::Serverless::Function # More info about Function Resohttps://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunctionurce:
+    Properties:
+      CodeUri: token_api/
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.8
+      Events:
+        AddToken:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /add_token
+            Method: post
+            RestApiId: !Ref ApiDeployment
+        UpdateToken:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /update_token
+            Method: put
+            RestApiId: !Ref ApiDeployment
+        GetToken:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /get_token
+            Method: get
+            RestApiId: !Ref ApiDeployment
+      Policies:
+        - AmazonSNSFullAccess
+        - AmazonDynamoDBFullAccess
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  BargainNotifierTokenApi:
+    Description: "API Gateway endpoint URL for syncing mobile tokens"
+    Value: !Sub "https://${ApiDeployment}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/"
+  BargainNotifierTokenApiFunction:
+    Description: "Function for managing mobile tokens for Bargain Notifier"
+    Value: !GetAtt BargainNotifierTokenApiFunction.Arn
+  BargainNotifierTokenApiFunctionIamRole:
+    Description: "Implicit IAM Role created for Bargain Notifier Token API function"
+    Value: !GetAtt BargainNotifierTokenApiFunctionRole.Arn
