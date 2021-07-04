@@ -31,23 +31,32 @@ Resources:
         AddToken:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /add_token
+            Path: /token
             Method: post
             RestApiId: !Ref ApiDeployment
         UpdateToken:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /update_token
+            Path: /token
             Method: put
-            RestApiId: !Ref ApiDeployment
-        GetToken:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-          Properties:
-            Path: /get_token
-            Method: get
             RestApiId: !Ref ApiDeployment
       Policies:
         - AmazonSNSFullAccess
+        - AmazonDynamoDBFullAccess
+  BargainNotifierKeywordApiFunction:
+    Type: AWS::Serverless::Function # More info about Function Resohttps://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunctionurce:
+    Properties:
+      CodeUri: keyword_api
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.8
+      Events:
+        UpdateKeywords:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /keyword
+            Method: post
+            RestApiId: !Ref ApiDeployment
+      Policies:
         - AmazonDynamoDBFullAccess
 
 Outputs:
