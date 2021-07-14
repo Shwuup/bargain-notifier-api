@@ -53,10 +53,28 @@ Resources:
         UpdateKeywords:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /keyword
+            Path: /keywords
+            Method: put
+            RestApiId: !Ref ApiDeployment
+      Policies:
+        - AmazonSNSFullAccess
+        - AmazonDynamoDBFullAccess
+  ScraperFunction:
+    Type: AWS::Serverless::Function # More info about Function Resohttps://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunctionurce:
+    Properties:
+      CodeUri: scraper
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.8
+      Timeout: 30
+      Events:
+        Scrape:
+          Type: Api
+          Properties:
+            Path: /scrape
             Method: post
             RestApiId: !Ref ApiDeployment
       Policies:
+        - AmazonSNSFullAccess
         - AmazonDynamoDBFullAccess
 
 Outputs:
