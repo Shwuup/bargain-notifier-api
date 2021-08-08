@@ -2,7 +2,8 @@ import boto3
 
 
 class DynamoDBScanIterator:
-    def __init__(self):
+    def __init__(self, user_table):
+        self.user_table = user_table
         self.client = boto3.client("dynamodb")
         self.current_response = None
         self.next_key = None
@@ -11,15 +12,15 @@ class DynamoDBScanIterator:
     def scan(self, last_evaluated_key):
         if last_evaluated_key is None:
             return self.client.scan(
-                TableName="test_users",
+                TableName=self.user_table,
                 FilterExpression="attribute_exists(keywords)",
-                ProjectionExpression="keywords, ARN",
+                ProjectionExpression="keywords, endpoint",
             )
         else:
             return self.client.scan(
-                TableName="test_users",
+                TableName=self.user_table,
                 FilterExpression="attribute_exists(keywords)",
-                ProjectionExpression="keywords, ARN",
+                ProjectionExpression="keywords, endpoint",
                 ExclusiveStartKey=last_evaluated_key,
             )
 

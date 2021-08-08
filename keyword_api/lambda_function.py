@@ -4,9 +4,11 @@ import traceback
 import sys
 import boto3  # pylint: disable=import-error
 import ast
+import os
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+user_db = os.environ["USER_DB"]
 
 
 def convert_to_dynamo_list(l):
@@ -17,12 +19,12 @@ def update_keywords(token, keywords):
     client = boto3.client("dynamodb")
     altered_keyword_list = convert_to_dynamo_list(keywords)
     response = client.update_item(
-        TableName="users",
+        TableName=user_db,
         Key={"token": {"S": token}},
         UpdateExpression="SET keywords = :newKeywords",
         ExpressionAttributeValues={":newKeywords": {"L": altered_keyword_list}},
     )
-    logger.info(f"Updated keywords\nresponse: {response}")
+    logger.info(json.dumps({"message": "Updated keywords", "response": response}))
     return response
 
 

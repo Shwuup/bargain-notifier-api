@@ -1,19 +1,29 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  bargain-notifier-token-api
+  bargain-notifier-api
 
-  API for syncing mobile tokens
+  API for bargain-notifier-app
 
 Parameters:
   Stage:
     Type: String
     Default: dev
+  UserDB:
+    Type: String
+    Default: Users-dev
+  LatestUrlDB:
+    Type: String
+    Default: LatestUrl-dev
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Timeout: 3
+    Environment:
+      Variables:
+        USER_DB: !Ref UserDB
+        LATEST_URL_DB: !Ref LatestUrlDB
 
 Resources:
   ApiDeployment:
@@ -49,12 +59,13 @@ Resources:
       CodeUri: keyword_api
       Handler: lambda_function.lambda_handler
       Runtime: python3.8
+      Timeout: 30
       Events:
         UpdateKeywords:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /keywords
-            Method: put
+            Method: post
             RestApiId: !Ref ApiDeployment
       Policies:
         - AmazonSNSFullAccess
@@ -68,11 +79,9 @@ Resources:
       Timeout: 30
       Events:
         Scrape:
-          Type: Api
+          Type: Schedule
           Properties:
-            Path: /scrape
-            Method: post
-            RestApiId: !Ref ApiDeployment
+            Schedule: "rate(10 minutes)"
       Policies:
         - AmazonSNSFullAccess
         - AmazonDynamoDBFullAccess
