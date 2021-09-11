@@ -9,12 +9,12 @@ Parameters:
   Stage:
     Type: String
     Default: dev
-  UserDB:
+  UserTable:
     Type: String
     Default: Users-dev
-  LatestUrlDB:
+  SeenDealsTable:
     Type: String
-    Default: LatestUrl-dev
+    Default: SeenDeals-dev
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -22,8 +22,8 @@ Globals:
     Timeout: 3
     Environment:
       Variables:
-        USER_DB: !Ref UserDB
-        LATEST_URL_DB: !Ref LatestUrlDB
+        USER_TABLE: !Ref UserTable
+        SEEN_DEALS_TABLE: !Ref SeenDealsTable
 
 Resources:
   ApiDeployment:

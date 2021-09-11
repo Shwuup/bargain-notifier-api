@@ -7,16 +7,12 @@ from bs4 import BeautifulSoup
 import requests
 import os
 from dynamodb_iterator import *
+import datetime
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-latest_url_db = os.environ["LATEST_URL_DB"]
-user_table = os.environ["USER_DB"]
-
-
-def highlighted_deals_exists(soup):
-    span = soup.find("span")
-    return True if span.text == "Highlighted Deals" else False
+user_table = os.environ["USER_TABLE"]
+seen_deals_table = os.environ["SEEN_DEALS_TABLE"]
 
 
 def get_html():
@@ -33,75 +29,75 @@ def get_test_html():
 
 def find_all_deal_elems(html):
     soup = BeautifulSoup(html, "html.parser")
-    if highlighted_deals_exists(soup):
-        deals_span = soup.select("span")[1]
-        res = deals_span.find_all_next(class_="node node-ozbdeal node-teaser")
-    else:
-        res = soup.find_all(class_="node node-ozbdeal node-teaser")
+    res = soup.find_all(class_="node node-ozbdeal node-teaser")
     return res
 
 
-def get_last_seen_deal_id():
-    client = boto3.client("dynamodb")
-    response = client.get_item(TableName=latest_url_db, Key={"id": {"N": "1"}})
-    node = response["Item"]["bargainId"]["S"]
-    logger.info(
-        json.dumps({"message": "Got last seen deal", "id": node, "response": response})
-    )
-    return node
-
-
-def update_last_seen_deal(last_seen_id):
-    client = boto3.client("dynamodb")
-    response = client.update_item(
-        TableName=latest_url_db,
-        Key={"id": {"N": "1"}},
-        UpdateExpression="SET bargainId = :newBargainId",
-        ExpressionAttributeValues={":newBargainId": {"S": last_seen_id}},
-    )
-    logger.info(
-        json.dumps(
-            {
-                "message": "Updated latest bargain ID",
-                "id": last_seen_id,
-                "response": response,
-            }
-        )
-    )
-    return response
-
-
-def check_for_new_deals(last_seen_id, elems):
-    bargains = []
-    new_last_seen_id = 0
+def check_for_new_deals(seen_deals, elems):
+    new_bargains = []
     for elem in elems:
         h2 = elem.find("h2", class_="title")
         title = h2["data-title"]
         bargain_id = elem["id"].strip("node")
-        if bargain_id == last_seen_id:
-            break
-        else:
-            bargains.append(
-                {
-                    "url": "https://www.ozbargain.com.au/node/" + bargain_id,
-                    "title": title,
-                }
-            )
-    if len(bargains) > 0:
-        new_last_seen_id = bargains[0]["url"].strip(
-            "https://www.ozbargain.com.au/node/"
+        if bargain_id not in seen_deals:
+            deal = {
+                "url": "https://www.ozbargain.com.au/node/" + bargain_id,
+                "title": title,
+            }
+            new_bargains.append(deal)
+    logger.info(json.dumps({"message": "Checked for new deals", "deals": new_bargains}))
+    return new_bargains
+
+
+def get_seen_deals():
+    dynamo_db_scan_iterator = DynamoDBScanIterator(seen_deals_table)
+    accumulator = []
+    for response in dynamo_db_scan_iterator:
+        seen_deals = response["Items"]
+        seen_deals = [item["id"]["S"] for item in seen_deals]
+        for item in seen_deals:
+            accumulator.append(item)
+    logger.info(
+        json.dumps(
+            {
+                "message": "Retrieved seen deals from SeenDeals table",
+                "accumulator": accumulator,
+            }
         )
-    logger.info(json.dumps({"message": "Checked for new deals", "deals": bargains}))
-    return bargains, new_last_seen_id
+    )
+    return accumulator
+
+
+def put_seen_deals(bargains):
+    dynamodb = boto3.resource("dynamodb")
+    table = dynamodb.Table(seen_deals_table)
+    today = datetime.datetime.today()
+    exp_date = int((today + datetime.timedelta(days=7)).timestamp())
+
+    with table.batch_writer() as batch:
+        for bargain in bargains:
+            stripped_id = bargain["url"].strip("https://www.ozbargain.com.au/node/")
+            batch.put_item(Item={"id": stripped_id, "expDate": exp_date})
+
+
+def keyword_scan_iterator():
+    projection_expression = "keywords, endpoint"
+    filter_expression = "attribute_exists(keywords)"
+    dynamo_db_scan_iterator = DynamoDBScanIterator(
+        table=user_table,
+        filter_expression=filter_expression,
+        projection_expression=projection_expression,
+    )
+    return dynamo_db_scan_iterator
 
 
 def process_notifications():
-    last_seen_deal_id = get_last_seen_deal_id()
-    new_deals, new_last_seen_id = check_for_new_deals(
-        last_seen_deal_id, find_all_deal_elems(get_html())
+    new_deals = check_for_new_deals(
+        seen_deals=get_seen_deals(), elems=find_all_deal_elems(get_html())
     )
     if len(new_deals) > 0:
-        dynamo_db_scan_iterator = DynamoDBScanIterator(user_table)
+        put_seen_deals(new_deals)
+        dynamo_db_scan_iterator = keyword_scan_iterator()
         for response in dynamo_db_scan_iterator:
             notifiees = response["Items"]
             deals_to_send = []
@@ -120,7 +116,6 @@ def process_notifications():
                     }
                     notify_user(arn, payload)
                 deals_to_send = []
-        update_last_seen_deal(new_last_seen_id)
 
 
 def process_keywords(keywords):

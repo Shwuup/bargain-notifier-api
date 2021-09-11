@@ -24,7 +24,15 @@ def update_keywords(token, keywords):
         UpdateExpression="SET keywords = :newKeywords",
         ExpressionAttributeValues={":newKeywords": {"L": altered_keyword_list}},
     )
-    logger.info(json.dumps({"message": "Updated keywords", "response": response}))
+    logger.info(
+        json.dumps(
+            {
+                "message": "Updated keywords",
+                "response": response,
+                "keywords": altered_keyword_list,
+            }
+        )
+    )
     return response
 
 

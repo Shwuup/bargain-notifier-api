@@ -1,14 +1,14 @@
-build:
-	sam build -t ./template.yaml
-
 kill:
 	fuser -k 3000/tcp
 
 deploy-local:
+	sam build -t ./template.yaml
 	sam local start-api
 
 deploy-dev:
-	sam deploy --parameter-overrides "ParameterKey=Stage,ParameterValue=dev ParameterKey=UserDB,ParameterValue=Users-dev ParameterKey=LatestUrlDB,ParameterValue=LatestUrl-dev" --config-file samconfig_dev.toml
+	sam build -t ./template.yaml
+	sam deploy --parameter-overrides "ParameterKey=Stage,ParameterValue=dev ParameterKey=UserTable,ParameterValue=Users-dev ParameterKey=LatestUrlTable,ParameterValue=LatestUrl-dev ParameterKey=SeenDealsTable,ParameterValue=SeenDeals-dev" --config-file samconfig_dev.toml
 
 deploy-prod:
-	sam deploy --parameter-overrides "ParameterKey=Stage,ParameterValue=prod ParameterKey=UserDB,ParameterValue=Users-prod ParameterKey=LatestUrlDB,ParameterValue=LatestUrl-prod" --config-file samconfig_prod.toml
+	sam build -t ./template.yaml
+	sam deploy --parameter-overrides "ParameterKey=Stage,ParameterValue=prod ParameterKey=UserTable,ParameterValue=Users-prod ParameterKey=LatestUrlTable,ParameterValue=LatestUrl-prod ParameterKey=SeenDealsTable,ParameterValue=SeenDeals-dev" --config-file samconfig_prod.toml

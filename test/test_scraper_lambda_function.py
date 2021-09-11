@@ -4,44 +4,33 @@ sys.path.insert(0, "../scraper/")
 from lambda_function import find_all_deal_elems, check_for_new_deals
 from bs4 import BeautifulSoup
 
-# 636396 = SodaStream Syrups
-def test_check_for_new_deals_highlightSuccess():
-    with open("test_html.html", "r", encoding="utf-8") as f:
-        html = f.read()
-    res = find_all_deal_elems(html)
-    actual_deals, actual_last_id = check_for_new_deals("636396", res)
-    expected_deals = [
-        {
-            "url": "https://www.ozbargain.com.au/node/636401",
-            "title": "[eBook] Free - Anabolic Kitchen/Strength Training NOT Bodybuilding/Weight Training: A Beginners Guide - Amazon AU/US",
-        },
-        {
-            "url": "https://www.ozbargain.com.au/node/636399",
-            "title": 'Fiskars 53cm 21" Soft Grip Bow Saw $5 @ Bunnings',
-        },
-    ]
-    expected_last_id = "636401"
-    assert actual_deals == expected_deals
-    assert actual_last_id == expected_last_id
 
-
-def test_check_for_new_deals_zeroCase():
-    with open("test_html.html", "r", encoding="utf-8") as f:
-        html = f.read()
-    res = find_all_deal_elems(html)
-    actual_deals, actual_last_id = check_for_new_deals("636401", res)
-    expected_deals = []
-    expected_last_id = 0
-    assert actual_deals == expected_deals
-    assert actual_last_id == expected_last_id
-
-
-# 636407 = Coles Rewards Mastercard
-def test_check_for_new_deals_noHighlightSuccess():
+def test_check_for_new_deals_success():
     with open("test_html_onlyDeals.html", "r", encoding="utf-8") as f:
         html = f.read()
     res = find_all_deal_elems(html)
-    actual_deals, actual_last_id = check_for_new_deals("636407", res)
+    seen_deals = [
+        "636229",
+        "636251",
+        "636255",
+        "636264",
+        "636310",
+        "636318",
+        "636322",
+        "636353",
+        "636355",
+        "636375",
+        "636380",
+        "636383",
+        "636393",
+        "636396",
+        "636399",
+        "636401",
+        "636405",
+        "636407",
+    ]
+
+    actual_deals = check_for_new_deals(seen_deals, res)
     expected_deals = [
         {
             "url": "https://www.ozbargain.com.au/node/636412",
@@ -52,24 +41,41 @@ def test_check_for_new_deals_noHighlightSuccess():
             "title": "Harpic Fresh Power Liquid Toilet Cleaner $1.91ea S&S When Buy 8 ($15.30 Total) + Delivery ($0 with Prime/ $39 Spend) @ Amazon AU",
         },
     ]
-    expected_last_id = "636412"
     assert actual_deals == expected_deals
-    assert actual_last_id == expected_last_id
 
 
-def test_check_for_new_deals_noHightlightZeroCase():
+def test_check_for_new_deals_zeroCase():
     with open("test_html.html", "r", encoding="utf-8") as f:
         html = f.read()
+        seen_deals = [
+            "636412",
+            "636411",
+            "636229",
+            "636251",
+            "636255",
+            "636264",
+            "636310",
+            "636318",
+            "636322",
+            "636353",
+            "636355",
+            "636375",
+            "636380",
+            "636383",
+            "636393",
+            "636396",
+            "636399",
+            "636401",
+            "636405",
+            "636407",
+        ]
     res = find_all_deal_elems(html)
-    actual_deals, actual_last_id = check_for_new_deals("636412", res)
+    actual_deals = check_for_new_deals(seen_deals, res)
     expected_deals = []
-    expected_last_id = 0
     assert actual_deals == expected_deals
-    assert actual_last_id == expected_last_id
 
 
 if __name__ == "__main__":
-    test_check_for_new_deals_highlightSuccess()
-    test_check_for_new_deals_zeroCase()
-    test_check_for_new_deals_noHighlightSuccess()
-    test_check_for_new_deals_noHightlightZeroCase
+    test_check_for_new_deals_success()
+    test_check_for_new_deals_zeroCase
+    print("Tests passed successfully!")
