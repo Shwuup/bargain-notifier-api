@@ -3,7 +3,7 @@ Backend for bargain-notifier-app
 ## Stack
 - Python
 - AWS
+  - SAM
   - Lambda
-  - CloudFormation
-  - AWS SAM
+  - API Gateway
   - DynamoDB
